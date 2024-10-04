@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password 
+      POSTGRES_DB: timedb
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - /volume1/docker/time/postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  app:
+    build:
+      context: /volume1/docker/time
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://postgres:your_password@db:5432/timedb
+      JWT_SECRET: mySuperSecretKey123! 
+      NODE_ENV: development 
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - /volume1/docker/time:/usr/local/app
+      - /volume1/docker/time/public:/usr/local/app/public
+    command: ["node", "server.js"]
+
+volumes:
+  postgres-data:
